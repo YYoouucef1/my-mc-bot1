@@ -1,0 +1,20 @@
+name: Minecraft Keeper Bot
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # يعمل كل 15 دقيقة تلقائياً
+  workflow_dispatch: # يتيح لك تشغيله يدوياً
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Run Minecraft Bot
+        run: node bot.js
+        timeout-minutes: 350 # سيستمر العمل لـ 6 ساعات ثم يعيد التشغيل
