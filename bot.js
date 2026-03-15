@@ -1,50 +1,37 @@
 const mineflayer = require('mineflayer');
 
+console.log("إعداد البوت... انتظر ثواني");
+
 function createBot() {
-    console.log('جاري محاولة الاتصال بالسيرفر...');
-    
     const bot = mineflayer.createBot({
         host: '4_player_in_1_world.aternos.me',
         port: 52892,
-        username: 'Yousef_Hero', // قمت بتغيير الاسم ليكون طبيعياً أكثر
-        version: "1.20.1",      // !!! تأكد أن هذا هو إصدار سيرفرك !!!
-        hideErrors: true,
-        checkTimeoutInterval: 60000
-    });
-
-    // معالجة الريسورس باك فوراً عند الطلب
-    bot._client.on('resource_pack_send', () => {
-        bot._client.write('resource_pack_receive', { result: 3 });
-        bot._client.write('resource_pack_receive', { result: 0 });
+        username: 'Yousef_Hero', 
+        version: false, // سيحاول اكتشاف الإصدار تلقائياً
+        hideErrors: true
     });
 
     bot.on('login', () => {
-        console.log('نجحت! البوت دخل السيرفر.');
+        console.log('مبروك! البوت دخل السيرفر الآن.');
     });
 
-    bot.on('spawn', () => {
-        // التحرك لمنع الطرد
-        setInterval(() => {
-            bot.setControlState('jump', true);
-            setTimeout(() => bot.setControlState('jump', false), 500);
-        }, 30000);
+    // التعامل مع الريسورس باك (سبب الطرد الأساسي)
+    bot.on('resourcePack', () => {
+        bot.acceptResourcePack();
+        console.log('تم قبول الريسورس باك');
     });
 
-    // السر هنا: معالجة الخطأ لمنع توقف الكود
+    // منع خروج البوت بسبب الخطأ - هذا سيبقي الـ Action يعمل
     bot.on('error', (err) => {
-        console.log('حدث خطأ (ECONNRESET أو غيره)، سأعيد المحاولة بعد 5 ثوانٍ...');
+        console.log('أترنوس رفض الاتصال (ECONNRESET).. سأحاول مجدداً بعد 5 ثوانٍ');
+        setTimeout(createBot, 5000); 
     });
 
     bot.on('end', () => {
-        console.log('انقطع الاتصال، جاري إعادة التشغيل...');
+        console.log('انقطع الاتصال.. جاري إعادة الدخول...');
         setTimeout(createBot, 5000);
     });
 }
 
-// تشغيل البوت مع حماية من الانهيار الكامل
-try {
-    createBot();
-} catch (e) {
-    console.log('خطأ في التشغيل، إعادة محاولة...');
-    setTimeout(createBot, 5000);
-}
+// تشغيل البوت لأول مرة
+createBot();
